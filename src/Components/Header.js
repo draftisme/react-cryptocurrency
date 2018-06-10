@@ -5,8 +5,13 @@ class Header extends Component {
     constructor(props){
         super(props);
         this.state = {
-            filter: ''
+            coinFilter: [],
+            filter: '',
+            sortBy: 'ascending'
         }
+
+        this.handleInput = this.handleInput.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     }   
 
     handleInput(e){
@@ -27,33 +32,83 @@ class Header extends Component {
             }      
         }
         this.props.loadCoinList(coinFilter);
+        this.setState({coinFilter});
+    }
+
+    loadOriginList = () => {
+        const coinFilter = this.props.coinList;
+        this.props.loadCoinList(coinFilter);
+        this.setState({coinFilter});        
+    }
+
+    handleSorting(btnType){
+        const { sortBy } = this.state;
+        switch(btnType){
+            case "name":
+                this.sortbyFunc(sortBy, "name");
+                break;
+            case "price":
+                this.sortbyFunc(sortBy, "price_usd");
+                break;
+            case "rank":
+                this.sortbyFunc(sortBy, "rank");
+                break;
+            default:
+                break;
+
+        }
+    }
+
+    sortbyFunc(sortBy, btnType){
+        const {coinFilter} = this.state;
+        
+        const list = coinFilter.sort((a, b) => {
+            if(btnType === "price_usd" || btnType === "rank"){
+                a[btnType] = Number(a[btnType]);
+                b[btnType] = Number(b[btnType]);
+                if(sortBy === "ascending") { 
+                    return a[btnType] - b[btnType];
+                } else {
+                    return b[btnType] - a[btnType];
+                }
+            } else {
+                if(sortBy === "ascending"){
+                    if(a[btnType].toUpperCase() < b[btnType].toUpperCase()) return -1;
+                    if(a[btnType].toUpperCase() > b[btnType].toUpperCase()) return 1;
+                } else{
+                    if(a[btnType].toUpperCase() > b[btnType].toUpperCase()) return -1;
+                    if(a[btnType].toUpperCase() < b[btnType].toUpperCase()) return 1;
+                }
+            }
+        })        
+        this.props.loadCoinList(list);
     }
 
     render(){
         return (
             <div id="header">
                 <div id="logo">
-                    <img src={Logo} alt="Logo" onClick={() => this.props.loadCoinList(this.props.coinList)} />
+                    <img src={Logo} alt="Logo" onClick={this.loadOriginList} />
                 </div>
                 <div id="sort">
                     <label>sort by: </label>
-                    <select>
+                    <select name="sortBy" value={this.state.sortBy} onChange={this.handleInput}>
                         <option value="ascending">ascending</option>
                         <option value="descending">descending</option>
                     </select>
-                    <button>name</button>
-                    <button>price</button>
-                    <button>rank</button>
+                    <button onClick={() => this.handleSorting("name")}>name</button>
+                    <button onClick={() => this.handleSorting("price")}>price</button>
+                    <button onClick={() => this.handleSorting("rank")}>rank</button>
                 </div>
                 <div>
-                    <form onSubmit={(e) => this.handleSubmit(e)}>
+                    <form onSubmit={this.handleSubmit}>
                         <input 
                             type="text" 
                             name="filter" 
                             value={this.state.name}
                             id="filter" 
                             placeholder="search find name..."
-                            onChange={(e) => this.handleInput(e)}    
+                            onChange={this.handleInput}    
                         />
                     </form>
                 </div>        

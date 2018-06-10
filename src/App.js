@@ -3,7 +3,7 @@ import './App.css';
 import Header from './Components/Header';
 import Coin from './Components/Coin';
 
-const API_URL = 'https://api.coinmarketcap.com/v1/ticker/?limit=100';
+const API_URL = 'https://api.coinmarketcap.com/v1/ticker/?limit=2000';
 
 class App extends Component {
   constructor(props){
