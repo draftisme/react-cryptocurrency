@@ -110,6 +110,7 @@ class Header extends Component {
                             placeholder="search find name..."
                             onChange={this.handleInput}    
                         />
+                        <button>Filter</button>
                     </form>
                 </div>        
             </div>
