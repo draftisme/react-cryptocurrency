@@ -9,9 +9,11 @@ class App extends Component {
   constructor(props){
     super(props);
     this.state = {
-      originList: [], //immutable data 
-      coinList: [] //rendered data
+      coinList: [],
+      sortBy: 'ascending'
     }
+
+    this.originList = [];
   }
 
   componentDidMount(){
@@ -20,25 +22,75 @@ class App extends Component {
     })
     .then(res => res.json())
     .then(data => {
-      const coinList = [...data];
-      const originList = coinList;
-      this.setState({originList, coinList});
+      this.originList = [...data];
+      const coinList = this.originList;
+      this.setState({coinList});
     })
     .catch(err => console.log(err))
   }
 
-  loadCoinList = (coinList) => {
+  loadOriginList = (coinList) => {
     this.setState({coinList});
   }  
 
+  handleInput = (e) => {
+    this.setState({
+        [e.target.name]: e.target.value
+    })
+  }
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    const {filter} = this.state;
+    let coinList = this.originList;
+    coinList = coinList.filter(coin => coin.name.toUpperCase().indexOf(filter.toUpperCase()) > -1); 
+    this.setState({coinList});
+  }
+
+  handleSorting = (btnType) => {
+    const { sortBy } = this.state;
+    const coinList = this.state.coinList.sort((a, b) => {
+      if(btnType === "name"){
+        a = a[btnType].toUpperCase();
+        b = b[btnType].toUpperCase();
+        let num;
+        if(sortBy === "ascending"){
+          if(a < b) num = -1;
+          if(a > b) num = 1;
+          return num;
+        } else {
+          if(a > b) num = -1;
+          if(a < b) num = 1;
+          return num;
+        }
+      } else {
+        a = Number(a[btnType]);
+        b = Number(b[btnType]);
+        
+        if(sortBy === "ascending")
+          return a - b;
+        else 
+          return b - a;
+      }
+    })
+
+    this.setState({coinList});
+  }
+
   render() {
-    let renderCoin;
-    if(this.state.coinList !== null){
-      renderCoin = this.state.coinList.map((coin, i) => <Coin key={i} coin={coin} />);
-    }
+    let renderCoin = this.state.coinList.map((coin, i) => <Coin key={i} coin={coin} />);
+    
     return (
       <div>
-        <Header coinList={this.state.originList} loadCoinList={this.loadCoinList} />
+        {/* {this.state.originList.length > 0 && <Header coinList={this.state.originList} loadCoinList={this.loadCoinList} />} */}
+        
+        <Header 
+          handleInput={this.handleInput} 
+          handleSubmit={this.handleSubmit}
+          loadOriginList={this.loadOriginList}
+          handleSorting={this.handleSorting}
+        />
+
         <div id="container">
           <div id="count_result">There are currently {this.state.coinList.length} type(s) of cryptocurrency</div>
           <div id="coin_container">
